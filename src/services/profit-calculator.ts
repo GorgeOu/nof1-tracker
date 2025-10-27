@@ -1,4 +1,4 @@
-import { UserTrade } from './binance-service';
+import { UserTrade } from './exchange-service';
 import { logInfo, logDebug } from '../utils/logger';
 
 export interface TradePair {

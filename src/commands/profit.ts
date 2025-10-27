@@ -1,9 +1,10 @@
-import { BinanceService } from '../services/binance-service';
+import { createExchangeService } from '../services/exchange-factory';
 import { TradeHistoryService } from '../services/trade-history-service';
 import { ProfitCalculator, ProfitAnalysis } from '../services/profit-calculator';
 import { OrderHistoryManager } from '../services/order-history-manager';
-import { logInfo, logWarn, logError } from '../utils/logger';
+import { logInfo, logWarn } from '../utils/logger';
 import { handleError } from '../utils/command-helpers';
+import { ExchangeService } from '../services/exchange-service';
 
 export interface ProfitCommandOptions {
   since?: string;
@@ -17,21 +18,13 @@ export interface ProfitCommandOptions {
 
 export async function handleProfitCommand(options: ProfitCommandOptions): Promise<void> {
   try {
-    // 验证环境变量
-    const apiKey = process.env.BINANCE_API_KEY;
-    const apiSecret = process.env.BINANCE_API_SECRET;
-
-    if (!apiKey || !apiSecret) {
-      throw new Error('BINANCE_API_KEY and BINANCE_API_SECRET environment variables are required');
-    }
-
-    // 初始化服务
-    const binanceService = new BinanceService(apiKey, apiSecret);
-    const tradeHistoryService = new TradeHistoryService(binanceService);
+    const exchangeName = (process.env.EXCHANGE || 'binance').toUpperCase();
+    const exchangeService: ExchangeService = createExchangeService();
+    const tradeHistoryService = new TradeHistoryService(exchangeService);
     const profitCalculator = new ProfitCalculator();
     const orderHistoryManager = new OrderHistoryManager();
 
-    logInfo('📊 Starting profit analysis...');
+    logInfo(`📊 Starting profit analysis on ${exchangeName}...`);
 
     // 解析时间参数
     let timeFilter = options.since;
@@ -97,7 +90,7 @@ export async function handleProfitCommand(options: ProfitCommandOptions): Promis
         } else {
           logInfo('📊 Fetching current positions for unrealized P&L...');
         }
-        positions = await binanceService.getPositions();
+        positions = await exchangeService.getPositions();
         unrealizedPnl = positions.reduce((sum, pos) => sum + parseFloat(pos.unRealizedProfit), 0);
         logInfo(`✅ Found ${positions.length} open positions with unrealized P&L: ${ProfitCalculator.formatCurrency(unrealizedPnl)} USDT`);
       } catch (error) {
@@ -117,7 +110,7 @@ export async function handleProfitCommand(options: ProfitCommandOptions): Promis
     }
 
     // 清理资源
-    binanceService.destroy();
+    exchangeService.destroy();
 
   } catch (error) {
     handleError(error, 'Profit analysis failed');
@@ -267,7 +260,7 @@ function outputTable(analysis: ProfitAnalysis, options: ProfitCommandOptions, un
 
   // 最近交易详情
   logInfo('\n📋 NOTE: Individual trade details are now simplified to focus on overall profitability statistics.');
-  logInfo('Each trade record in Binance API represents completed transactions with realized P&L already calculated.');
+  logInfo('Each trade record from the exchange API represents completed transactions with realized P&L already calculated.');
 
   // 分析总结（仅在不是仅显示浮动盈亏模式时显示）
   if (!unrealizedOnly) {

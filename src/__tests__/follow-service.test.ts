@@ -83,8 +83,8 @@ describe('FollowService', () => {
     mockPositionManager.openPosition = jest.fn().mockResolvedValue({ success: true, symbol: 'BTCUSDT', operation: 'open' });
     mockPositionManager.cleanOrphanedOrders = jest.fn().mockResolvedValue(undefined);
     
-    // Mock binanceService for position checks
-    (mockPositionManager as any).binanceService = {
+    // Mock exchangeService for position checks
+    (mockPositionManager as any).exchangeService = {
       getPositions: jest.fn().mockResolvedValue([
         {
           symbol: 'BTCUSDT',
@@ -206,7 +206,7 @@ describe('FollowService', () => {
       ]);
       
       // Mock binanceService to return existing position
-      (mockPositionManager as any).binanceService.getPositions.mockResolvedValue([
+      (mockPositionManager as any).exchangeService.getPositions.mockResolvedValue([
         {
           symbol: 'BTCUSDT',
           positionAmt: '0.1',
@@ -300,7 +300,7 @@ describe('FollowService', () => {
 
     it('should detect entry_oid change', async () => {
       // Mock binanceService to return existing position
-      (mockPositionManager as any).binanceService.getPositions.mockResolvedValue([
+      (mockPositionManager as any).exchangeService.getPositions.mockResolvedValue([
         {
           symbol: 'BTCUSDT',
           positionAmt: '0.1',
@@ -371,7 +371,7 @@ describe('FollowService', () => {
       ]);
       
       // Mock binanceService to return existing position
-      (mockPositionManager as any).binanceService.getPositions.mockResolvedValue([
+      (mockPositionManager as any).exchangeService.getPositions.mockResolvedValue([
         {
           symbol: 'BTCUSDT',
           positionAmt: '0.1',
@@ -466,7 +466,7 @@ describe('FollowService', () => {
 
     it('should generate plan with releasedMargin when position changed', async () => {
       // Mock binanceService to return existing position
-      (mockPositionManager as any).binanceService.getPositions.mockResolvedValue([
+      (mockPositionManager as any).exchangeService.getPositions.mockResolvedValue([
         {
           symbol: 'BTCUSDT',
           positionAmt: '0.1',
@@ -926,7 +926,7 @@ describe('FollowService', () => {
 
     it('should detect profit target reached', async () => {
       // Mock getAllPositions to return position with profit
-      (mockPositionManager as any).binanceService.getAllPositions = jest.fn().mockResolvedValue([
+      (mockPositionManager as any).exchangeService.getAllPositions = jest.fn().mockResolvedValue([
         {
           symbol: 'BTCUSDT',
           positionAmt: '0.1',
@@ -950,7 +950,7 @@ describe('FollowService', () => {
       const { logError } = require('../utils/logger');
       
       // Mock getAllPositions to throw error
-      (mockPositionManager as any).binanceService.getAllPositions = jest.fn().mockRejectedValue(new Error('API error'));
+      (mockPositionManager as any).exchangeService.getAllPositions = jest.fn().mockRejectedValue(new Error('API error'));
 
       const resultPromise = followService.followAgent('test-agent', [mockPosition], { profitTarget: 50 });
       await jest.runAllTimersAsync();
@@ -963,13 +963,13 @@ describe('FollowService', () => {
       const { logWarn } = require('../utils/logger');
       
       // Mock getAllPositions to return empty array
-      (mockPositionManager as any).binanceService.getAllPositions = jest.fn().mockResolvedValue([]);
+      (mockPositionManager as any).exchangeService.getAllPositions = jest.fn().mockResolvedValue([]);
 
       const resultPromise = followService.followAgent('test-agent', [mockPosition], { profitTarget: 50 });
       await jest.runAllTimersAsync();
       await resultPromise;
 
-      expect(logWarn).toHaveBeenCalledWith(expect.stringContaining('No binance position found'));
+      expect(logWarn).toHaveBeenCalledWith(expect.stringContaining('No exchange position found'));
     });
 
     it('should handle zero margin (returns 0% profit)', async () => {
@@ -987,7 +987,7 @@ describe('FollowService', () => {
       ]);
 
       // Mock getAllPositions to return position with zero margin
-      (mockPositionManager as any).binanceService.getAllPositions = jest.fn().mockResolvedValue([
+      (mockPositionManager as any).exchangeService.getAllPositions = jest.fn().mockResolvedValue([
         {
           symbol: 'BTCUSDT',
           positionAmt: '0.1',
@@ -1013,7 +1013,7 @@ describe('FollowService', () => {
       const { logError } = require('../utils/logger');
       
       // Mock getAllPositions to return position with high profit
-      (mockPositionManager as any).binanceService.getAllPositions = jest.fn().mockResolvedValue([
+      (mockPositionManager as any).exchangeService.getAllPositions = jest.fn().mockResolvedValue([
         {
           symbol: 'BTCUSDT',
           positionAmt: '0.1',
@@ -1042,7 +1042,7 @@ describe('FollowService', () => {
       const { logWarn } = require('../utils/logger');
       
       // Mock binanceService.getPositions to throw error
-      (mockPositionManager as any).binanceService.getPositions.mockRejectedValue(new Error('API error'));
+      (mockPositionManager as any).exchangeService.getPositions.mockRejectedValue(new Error('API error'));
 
       // Mock order history
       mockOrderHistoryManager.getProcessedOrdersByAgent = jest.fn().mockReturnValue([
@@ -1069,7 +1069,7 @@ describe('FollowService', () => {
       const { logWarn } = require('../utils/logger');
       
       // Mock binanceService.getPositions to return existing position
-      (mockPositionManager as any).binanceService.getPositions.mockResolvedValue([
+      (mockPositionManager as any).exchangeService.getPositions.mockResolvedValue([
         {
           symbol: 'BTCUSDT',
           positionAmt: '0.1',
@@ -1108,7 +1108,7 @@ describe('FollowService', () => {
       const { logWarn } = require('../utils/logger');
       
       // Mock binanceService.getPositions to return existing position
-      (mockPositionManager as any).binanceService.getPositions.mockResolvedValue([
+      (mockPositionManager as any).exchangeService.getPositions.mockResolvedValue([
         {
           symbol: 'BTCUSDT',
           positionAmt: '0.1',
@@ -1149,7 +1149,7 @@ describe('FollowService', () => {
       const { logWarn } = require('../utils/logger');
       
       // Mock binanceService.getPositions to return existing position
-      (mockPositionManager as any).binanceService.getPositions.mockResolvedValue([
+      (mockPositionManager as any).exchangeService.getPositions.mockResolvedValue([
         {
           symbol: 'BTCUSDT',
           positionAmt: '0.1',
@@ -1192,7 +1192,7 @@ describe('FollowService', () => {
       const { logError } = require('../utils/logger');
       
       // Mock binanceService.getPositions to return existing position
-      (mockPositionManager as any).binanceService.getPositions.mockResolvedValue([
+      (mockPositionManager as any).exchangeService.getPositions.mockResolvedValue([
         {
           symbol: 'BTCUSDT',
           positionAmt: '0.1',
@@ -1218,7 +1218,7 @@ describe('FollowService', () => {
       const { logWarn } = require('../utils/logger');
       
       // Mock binanceService.getPositions to return existing position
-      (mockPositionManager as any).binanceService.getPositions.mockResolvedValue([
+      (mockPositionManager as any).exchangeService.getPositions.mockResolvedValue([
         {
           symbol: 'BTCUSDT',
           positionAmt: '0.1',
@@ -1243,7 +1243,7 @@ describe('FollowService', () => {
       const { logWarn } = require('../utils/logger');
       
       // Mock binanceService.getPositions to return existing position
-      (mockPositionManager as any).binanceService.getPositions.mockResolvedValue([
+      (mockPositionManager as any).exchangeService.getPositions.mockResolvedValue([
         {
           symbol: 'BTCUSDT',
           positionAmt: '0.1',

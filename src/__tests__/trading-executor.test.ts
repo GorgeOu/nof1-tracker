@@ -17,7 +17,7 @@ describe("TradingExecutor", () => {
   beforeEach(() => {
     // Create a TradingExecutor instance
     executor = new TradingExecutor();
-    mockBinanceService = (executor as any).binanceService;
+    mockBinanceService = (executor as any).exchangeService;
 
     // Mock the BinanceService methods
     mockBinanceService.getServerTime = jest.fn().mockResolvedValue(Date.now());
@@ -71,7 +71,7 @@ describe("TradingExecutor", () => {
     });
 
     it("should create TradingExecutor instance with custom API credentials", () => {
-      const executor = new TradingExecutor("test-api-key", "test-api-secret");
+      const executor = new TradingExecutor({ apiKey: "test-api-key", apiSecret: "test-api-secret" });
       expect(executor).toBeInstanceOf(TradingExecutor);
     });
   });
@@ -794,7 +794,7 @@ describe("TradingExecutor", () => {
         const result = await executor.executePlan(tradingPlan);
 
         expect(result.success).toBe(false);
-        expect(result.error).toBe("Failed to connect to Binance API");
+        expect(result.error).toBe("Failed to connect to BINANCE API");
       });
 
       it("should handle placeOrder failure in executePlan", async () => {
@@ -1276,7 +1276,7 @@ describe("TradingExecutor", () => {
         const result = await executor.executePlan(tradingPlan);
 
         expect(result.success).toBe(false);
-        expect(result.error).toBe("Failed to connect to Binance API");
+        expect(result.error).toBe("Failed to connect to BINANCE API");
       });
     });
 
@@ -1295,7 +1295,7 @@ describe("TradingExecutor", () => {
       });
 
       it("should create executor with custom API credentials", () => {
-        const customExecutor = new TradingExecutor("custom_key", "custom_secret", true);
+        const customExecutor = new TradingExecutor({ apiKey: "custom_key", apiSecret: "custom_secret", testnet: true });
 
         expect(customExecutor).toBeDefined();
       });
