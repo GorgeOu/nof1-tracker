@@ -45,6 +45,7 @@ describe('Status Command', () => {
 
     expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('API Connectivity'));
     expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('nof1 API'));
-    expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('Binance API'));
+    const exchangeLabel = (process.env.EXCHANGE || 'binance').toUpperCase();
+    expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining(`${exchangeLabel} API`));
   });
 });

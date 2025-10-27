@@ -6,7 +6,7 @@
 ![Node.js](https://img.shields.io/badge/node-%3E%3D18.0.0-green)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
-一个用于跟踪 nof1.ai AI Agent 交易信号并自动执行 Binance 合约交易的命令行工具。支持7个AI量化Agent的实时跟单，自动识别开仓、平仓、换仓和止盈止损信号。
+一个用于跟踪 nof1.ai AI Agent 交易信号并自动执行 Binance 或 OKX 合约交易的命令行工具。支持7个AI量化Agent的实时跟单，自动识别开仓、平仓、换仓和止盈止损信号。
 
 ## ⚡ 快速开始
 
@@ -38,7 +38,7 @@ npm start -- profit
 - **🔄 智能跟单**: 自动识别开仓、平仓、换仓（OID变化）和止盈止损
 - **🎯 盈利目标退出**: 支持设置自定义盈利目标，达到后自动平仓退出
 - **🔄 自动重新跟单**: 可选的自动重新跟单功能，盈利退出后自动重新入场
-- **⚡ 合约交易**: 完整支持Binance USDT永续合约，支持1x-125x杠杆
+- **⚡ 合约交易**: 完整支持Binance/OKX USDT永续合约，支持1x-125x杠杆
 - **📈 盈利统计**: 精确的盈利分析，基于真实交易数据计算（含手续费统计）
 - **🛡️ 风险控制**: 支持`--risk-only`模式，只观察不执行交易
 
@@ -63,7 +63,16 @@ npm start -- profit
 
 ## ⚙️ 配置
 
-### 1. Binance API 密钥配置（重要）
+### 1. 选择交易所
+
+在`.env`中设置要使用的交易所：
+
+```env
+# 可选值：binance 或 okx（默认 binance）
+EXCHANGE=binance
+```
+
+### 2. Binance API 密钥配置（重要）
 
 本系统使用 **Binance 合约交易API**，必须正确配置权限：
 
@@ -86,13 +95,34 @@ npm start -- profit
    BINANCE_API_SECRET=测试网Secret密钥
    ```
 
-### 2. 环境变量配置
+### 3. OKX API 密钥配置
+
+如果选择使用 OKX，需要在 [OKX API 管理](https://www.okx.com/account/my-api) 中创建 API Key，并确保启用永续合约交易权限：
 
 ```env
+OKX_API_KEY=your_okx_api_key_here
+OKX_API_SECRET=your_okx_api_secret_here
+OKX_API_PASSPHRASE=your_okx_passphrase
+# 模拟盘设置（Paper Trading / Demo Trading）
+OKX_SIMULATED=true
+```
+
+### 4. 环境变量配置
+
+```env
+# Exchange Configuration
+EXCHANGE=binance
+
 # Binance API Configuration - 必须支持合约交易
 BINANCE_API_KEY=your_binance_api_key_here
 BINANCE_API_SECRET=your_binance_api_secret_here
 BINANCE_TESTNET=true  # true=测试网, false=正式网
+
+# OKX API Configuration（仅当 EXCHANGE=okx 时需要）
+OKX_API_KEY=your_okx_api_key_here
+OKX_API_SECRET=your_okx_api_secret_here
+OKX_API_PASSPHRASE=your_okx_passphrase_here
+OKX_SIMULATED=true  # true=模拟盘, false=实盘
 
 # Trading Configuration
 MAX_POSITION_SIZE=1000

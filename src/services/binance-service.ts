@@ -2,36 +2,18 @@ import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import CryptoJS from 'crypto-js';
 import http from 'http';
 import https from 'https';
+import {
+  ExchangeOrder,
+  StopLossOrder,
+  TakeProfitOrder,
+  OrderResponse,
+  PositionResponse,
+  UserTrade,
+  ExchangeService
+} from './exchange-service';
 
-export interface BinanceOrder {
-  symbol: string;
-  side: "BUY" | "SELL";
-  type: "MARKET" | "LIMIT" | "STOP" | "TAKE_PROFIT" | "TAKE_PROFIT_MARKET" | "STOP_MARKET";
-  quantity: string;
-  leverage: number;
-  price?: string;
-  stopPrice?: string;
-  timeInForce?: "GTC" | "IOC" | "FOK";
-  closePosition?: string;
-}
-
-export interface StopLossOrder {
-  symbol: string;
-  side: "BUY" | "SELL";
-  type: "STOP_MARKET" | "STOP";
-  quantity: string;
-  stopPrice: string;
-  closePosition?: string;
-}
-
-export interface TakeProfitOrder {
-  symbol: string;
-  side: "BUY" | "SELL";
-  type: "TAKE_PROFIT_MARKET" | "TAKE_PROFIT";
-  quantity: string;
-  stopPrice: string;
-  closePosition?: string;
-}
+export type BinanceOrder = ExchangeOrder;
+export { StopLossOrder, TakeProfitOrder, OrderResponse, PositionResponse, UserTrade } from './exchange-service';
 
 export interface BinanceApiResponse<T = any> {
   code?: number;
@@ -42,67 +24,7 @@ export interface BinanceApiResponse<T = any> {
 // Binance API通常直接返回数据，不包装在response对象中
 export type BinanceDirectResponse<T> = T;
 
-export interface OrderResponse {
-  orderId: number;
-  symbol: string;
-  status: string;
-  clientOrderId: string;
-  price: string;
-  avgPrice: string;
-  origQty: string;
-  executedQty: string;
-  cumQty: string;
-  cumQuote: string;
-  timeInForce: string;
-  type: string;
-  reduceOnly: boolean;
-  closePosition: boolean;
-  side: string;
-  positionSide: string;
-  stopPrice: string;
-  workingType: string;
-  priceProtect: boolean;
-  origType: string;
-  time: number;
-  updateTime: number;
-}
-
-export interface PositionResponse {
-  symbol: string;
-  positionAmt: string;
-  entryPrice: string;
-  markPrice: string;
-  unRealizedProfit: string;
-  liquidationPrice: string;
-  leverage: string;
-  maxNotionalValue: string;
-  marginType: string;
-  isolatedMargin: string;
-  isAutoAddMargin: string;
-  positionSide: string;
-  notional: string;
-  isolatedWallet: string;
-  updateTime: number;
-}
-
-export interface UserTrade {
-  symbol: string;
-  id: number;
-  orderId: number;
-  side: 'BUY' | 'SELL';
-  qty: string;
-  price: string;
-  quoteQty: string;
-  commission: string;
-  commissionAsset: string;
-  realizedPnl: string;
-  time: number;
-  positionSide: string;
-  buyer: boolean;
-  maker: boolean;
-}
-
-export class BinanceService {
+export class BinanceService implements ExchangeService {
   private apiKey: string;
   private apiSecret: string;
   private baseUrl: string;
@@ -484,7 +406,7 @@ export class BinanceService {
   /**
    * 下单
    */
-  async placeOrder(order: BinanceOrder): Promise<OrderResponse> {
+  async placeOrder(order: ExchangeOrder): Promise<OrderResponse> {
     const params: Record<string, any> = {
       symbol: this.convertSymbol(order.symbol),
       side: order.side,
@@ -648,7 +570,7 @@ export class BinanceService {
     return allTrades;
   }
 
-  convertToBinanceOrder(tradingPlan: any): BinanceOrder {
+  convertToExchangeOrder(tradingPlan: any): ExchangeOrder {
     return {
       symbol: tradingPlan.symbol,
       side: tradingPlan.side,
@@ -656,6 +578,10 @@ export class BinanceService {
       quantity: this.formatQuantity(tradingPlan.quantity, tradingPlan.symbol),
       leverage: tradingPlan.leverage
     };
+  }
+
+  convertToBinanceOrder(tradingPlan: any): ExchangeOrder {
+    return this.convertToExchangeOrder(tradingPlan);
   }
 
   /**

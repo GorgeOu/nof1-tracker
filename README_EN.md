@@ -6,7 +6,7 @@
 ![Node.js](https://img.shields.io/badge/node-%3E%3D18.0.0-green)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
-A command-line tool for tracking nof1.ai AI Agent trading signals and automatically executing Binance futures trades. Supports real-time copy trading from 7 AI quantitative agents with automatic position opening, closing, switching, and stop-loss/take-profit.
+A command-line tool for tracking nof1.ai AI Agent trading signals and automatically executing Binance or OKX futures trades. Supports real-time copy trading from 7 AI quantitative agents with automatic position opening, closing, switching, and stop-loss/take-profit.
 
 ## ⚡ Quick Start
 
@@ -38,7 +38,7 @@ npm start -- profit
 - **🔄 Smart Copy Trading**: Auto-detect open, close, switch positions (OID changes), and stop-loss/take-profit
 - **🎯 Profit Target Exit**: Support custom profit targets with automatic position closing when reached
 - **🔄 Auto Refollow**: Optional auto-refollow feature that automatically re-enters after profit target exit
-- **⚡ Futures Trading**: Full support for Binance USDT perpetual futures, 1x-125x leverage
+- **⚡ Futures Trading**: Full support for Binance/OKX USDT perpetual futures, 1x-125x leverage
 - **📈 Profit Analysis**: Accurate profit analysis based on real trading data (including fee statistics)
 - **🛡️ Risk Control**: Support `--risk-only` mode for observation without execution
 
@@ -62,7 +62,16 @@ Real-time view of deepseek-chat-v3.1 AI Agent's trading performance, positions, 
 
 ## ⚙️ Configuration
 
-### 1. Binance API Key Configuration (Important)
+### 1. Choose Exchange
+
+Set the exchange you want to use in `.env`:
+
+```env
+# Options: binance or okx (default binance)
+EXCHANGE=binance
+```
+
+### 2. Binance API Key Configuration (Important)
 
 This system uses **Binance Futures Trading API**, permissions must be configured correctly:
 
@@ -85,13 +94,34 @@ This system uses **Binance Futures Trading API**, permissions must be configured
    BINANCE_API_SECRET=testnet_secret_key
    ```
 
-### 2. Environment Variables
+### 3. OKX API Key Configuration
+
+If you prefer OKX, create an API key in the [OKX API Console](https://www.okx.com/account/my-api) and ensure perpetual trading permissions are enabled:
 
 ```env
+OKX_API_KEY=your_okx_api_key_here
+OKX_API_SECRET=your_okx_api_secret_here
+OKX_API_PASSPHRASE=your_okx_passphrase
+# Paper trading / demo environment
+OKX_SIMULATED=true
+```
+
+### 4. Environment Variables
+
+```env
+# Exchange Configuration
+EXCHANGE=binance
+
 # Binance API Configuration - Must support futures trading
 BINANCE_API_KEY=your_binance_api_key_here
 BINANCE_API_SECRET=your_binance_api_secret_here
 BINANCE_TESTNET=true  # true=testnet, false=mainnet
+
+# OKX API Configuration (required when EXCHANGE=okx)
+OKX_API_KEY=your_okx_api_key_here
+OKX_API_SECRET=your_okx_api_secret_here
+OKX_API_PASSPHRASE=your_okx_passphrase_here
+OKX_SIMULATED=true  # true=demo trading, false=live trading
 
 # Trading Configuration
 MAX_POSITION_SIZE=1000

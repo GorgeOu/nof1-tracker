@@ -14,7 +14,6 @@ import { PositionManager } from "../services/position-manager";
 import { FollowService } from "../services/follow-service";
 import { OrderHistoryManager } from "../services/order-history-manager";
 import { TradingExecutor } from "../services/trading-executor";
-import { BinanceService } from "../services/binance-service";
 import { RiskManager } from "../services/risk-manager";
 import { FuturesCapitalManager } from "../services/futures-capital-manager";
 import {
@@ -25,6 +24,8 @@ import {
   handleErrors,
   ConfigurationError
 } from "../utils/errors";
+import { createExchangeService } from "../services/exchange-factory";
+import { ExchangeService, ExchangeName } from "../services/exchange-service";
 
 // 重新导出类型以保持向后兼容性
 export type {
@@ -42,7 +43,8 @@ export class ApiAnalyzer {
   private positionManager: PositionManager;
   private followService: FollowService;
   private configManager: ConfigManager;
-  private binanceService: BinanceService;
+  private exchangeService: ExchangeService;
+  private exchange: ExchangeName;
   private tradingExecutor: TradingExecutor;
   private orderHistoryManager: OrderHistoryManager;
 
@@ -61,21 +63,20 @@ export class ApiAnalyzer {
       this.apiClient = apiClient || new ApiClient();
     }
 
+    this.exchange = (process.env.EXCHANGE || 'binance').toLowerCase() as ExchangeName;
+
     // 验证环境变量
     this.validateEnvironment();
 
     // 初始化服务
-    this.binanceService = new BinanceService(
-      process.env[ENV_VARS.BINANCE_API_KEY] || "",
-      process.env[ENV_VARS.BINANCE_API_SECRET] || ""
-    );
-    this.tradingExecutor = new TradingExecutor();
+    this.exchangeService = createExchangeService({ exchange: this.exchange });
+    this.tradingExecutor = new TradingExecutor({ exchange: this.exchange });
     this.orderHistoryManager = new OrderHistoryManager();
     const riskManager = new RiskManager(this.configManager);
     const capitalManager = new FuturesCapitalManager();
 
     this.positionManager = new PositionManager(
-      this.binanceService,
+      this.exchangeService,
       this.tradingExecutor,
       this.orderHistoryManager
     );
@@ -103,10 +104,9 @@ export class ApiAnalyzer {
       return;
     }
 
-    const requiredEnvVars = [
-      ENV_VARS.BINANCE_API_KEY,
-      ENV_VARS.BINANCE_API_SECRET
-    ];
+    const requiredEnvVars = this.exchange === 'okx'
+      ? [ENV_VARS.OKX_API_KEY, ENV_VARS.OKX_API_SECRET, ENV_VARS.OKX_API_PASSPHRASE]
+      : [ENV_VARS.BINANCE_API_KEY, ENV_VARS.BINANCE_API_SECRET];
 
     for (const envVar of requiredEnvVars) {
       if (!process.env[envVar]) {
@@ -235,8 +235,8 @@ export class ApiAnalyzer {
    * 清理资源，关闭所有连接
    */
   destroy(): void {
-    if (this.binanceService) {
-      this.binanceService.destroy();
+    if (this.exchangeService) {
+      this.exchangeService.destroy();
     }
     if (this.tradingExecutor) {
       this.tradingExecutor.destroy();
