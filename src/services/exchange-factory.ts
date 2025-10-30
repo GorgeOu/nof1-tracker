@@ -9,6 +9,7 @@ export interface ExchangeFactoryOptions {
   passphrase?: string;
   testnet?: boolean;
   simulated?: boolean;
+  baseUrl?: string;
 }
 
 export function createExchangeService(options: ExchangeFactoryOptions = {}): ExchangeService {
@@ -21,14 +22,18 @@ export function createExchangeService(options: ExchangeFactoryOptions = {}): Exc
     const passphrase = options.passphrase || process.env.OKX_API_PASSPHRASE || '';
     const simulated = options.simulated ?? process.env.OKX_SIMULATED === 'true';
 
+    const baseUrl = options.baseUrl || process.env.OKX_API_URL || 'https://www.okx.com';
+
     if (!apiKey || !apiSecret || !passphrase) {
       if (isTestEnv) {
-        return new OkxService(apiKey, apiSecret, passphrase, simulated);
+        return new OkxService(apiKey, apiSecret, passphrase, simulated, baseUrl);
+
       }
       throw new Error('OKX_API_KEY, OKX_API_SECRET, and OKX_API_PASSPHRASE environment variables are required for OKX');
     }
 
-    return new OkxService(apiKey, apiSecret, passphrase, simulated);
+    return new OkxService(apiKey, apiSecret, passphrase, simulated, baseUrl);
+
   }
 
   const apiKey = options.apiKey || process.env.BINANCE_API_KEY || '';

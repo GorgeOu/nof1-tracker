@@ -102,6 +102,9 @@ If you prefer OKX, create an API key in the [OKX API Console](https://www.okx.co
 OKX_API_KEY=your_okx_api_key_here
 OKX_API_SECRET=your_okx_api_secret_here
 OKX_API_PASSPHRASE=your_okx_passphrase
+
+# Optional: switch to an alternate domain if www.okx.com is blocked in your region
+# OKX_API_URL=https://aws.okx.com
 # Paper trading / demo environment
 OKX_SIMULATED=true
 ```
@@ -121,6 +124,10 @@ BINANCE_TESTNET=true  # true=testnet, false=mainnet
 OKX_API_KEY=your_okx_api_key_here
 OKX_API_SECRET=your_okx_api_secret_here
 OKX_API_PASSPHRASE=your_okx_passphrase_here
+
+# Optional: override the default domain when DNS cannot resolve www.okx.com
+# OKX_API_URL=https://aws.okx.com
+
 OKX_SIMULATED=true  # true=demo trading, false=live trading
 
 # Trading Configuration

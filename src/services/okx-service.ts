@@ -75,14 +75,14 @@ export class OkxService implements ExchangeService {
     apiKey: string,
     apiSecret: string,
     passphrase: string,
-    simulatedTrading: boolean = false
+    simulatedTrading: boolean = false,
+    baseUrl: string = 'https://www.okx.com'
   ) {
     this.apiKey = apiKey;
     this.apiSecret = apiSecret;
     this.passphrase = passphrase;
     this.simulatedTrading = simulatedTrading;
-    this.baseUrl = 'https://www.okx.com';
-
+    this.baseUrl = baseUrl;
     this.client = axios.create({
       baseURL: this.baseUrl,
       timeout: 10000,
@@ -221,18 +221,40 @@ export class OkxService implements ExchangeService {
     }
 
     const url = method === 'GET' ? requestPath : path;
-    const response = await this.client.request<OkxResponse<T>>({
-      method,
-      url,
-      data: method === 'GET' ? undefined : params,
-      headers
-    });
+    try {
+      const response = await this.client.request<OkxResponse<T>>({
+        method,
+        url,
+        data: method === 'GET' ? undefined : params,
+        headers
+      });
 
-    const responseData = response.data;
-    if (responseData.code !== '0') {
-      throw new Error(`OKX API Error: ${responseData.msg || responseData.code}`);
+      const responseData = response.data;
+      if (responseData.code !== '0') {
+        throw new Error(`OKX API Error: ${responseData.msg || responseData.code}`);
+      }
+      return responseData;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const networkCodes = new Set(['ENOTFOUND', 'EAI_AGAIN']);
+        const isDnsError =
+          networkCodes.has(error.code || '') ||
+          (typeof error.message === 'string' && error.message.includes('getaddrinfo'));
+
+        if (isDnsError) {
+          throw new Error(
+            `Unable to resolve OKX host at ${this.baseUrl}. ` +
+              'If you are in a region where www.okx.com is blocked, set OKX_API_URL to an alternate domain such as https://aws.okx.com. ' +
+              `Original error: ${error.message}`
+          );
+        }
+      }
+
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error('Unknown error communicating with OKX API');
     }
-    return responseData;
   }
 
   async getServerTime(): Promise<number> {
