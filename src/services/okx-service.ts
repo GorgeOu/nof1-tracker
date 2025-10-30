@@ -83,7 +83,6 @@ export class OkxService implements ExchangeService {
     this.passphrase = passphrase;
     this.simulatedTrading = simulatedTrading;
     this.baseUrl = baseUrl;
-
     this.client = axios.create({
       baseURL: this.baseUrl,
       timeout: 10000,

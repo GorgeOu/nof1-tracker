@@ -103,6 +103,7 @@ EXCHANGE=binance
 OKX_API_KEY=your_okx_api_key_here
 OKX_API_SECRET=your_okx_api_secret_here
 OKX_API_PASSPHRASE=your_okx_passphrase
+
 # 可选：如果所在地区无法访问 www.okx.com，可切换备用域名
 # OKX_API_URL=https://aws.okx.com
 # 模拟盘设置（Paper Trading / Demo Trading）
@@ -124,6 +125,7 @@ BINANCE_TESTNET=true  # true=测试网, false=正式网
 OKX_API_KEY=your_okx_api_key_here
 OKX_API_SECRET=your_okx_api_secret_here
 OKX_API_PASSPHRASE=your_okx_passphrase_here
+
 # 可选：若默认域名无法解析，可设置为 https://aws.okx.com 等可访问的域名
 # OKX_API_URL=https://aws.okx.com
 OKX_SIMULATED=true  # true=模拟盘, false=实盘
