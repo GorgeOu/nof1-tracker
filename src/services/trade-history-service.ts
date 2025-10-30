@@ -1,7 +1,7 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import { logInfo, logDebug, logWarn } from '../utils/logger';
-import { BinanceService, UserTrade } from './binance-service';
+import { ExchangeService, UserTrade } from './exchange-service';
 
 export interface TradeHistoryOptions {
   symbol?: string;
@@ -22,11 +22,11 @@ export interface CachedTradeData {
 
 export class TradeHistoryService {
   private cacheDir: string;
-  private binanceService: BinanceService;
+  private exchangeService: ExchangeService;
   private cacheExpiry: number = 5 * 60 * 1000; // 5分钟缓存过期时间
 
-  constructor(binanceService: BinanceService, cacheDir: string = './data') {
-    this.binanceService = binanceService;
+  constructor(exchangeService: ExchangeService, cacheDir: string = './data') {
+    this.exchangeService = exchangeService;
     this.cacheDir = cacheDir;
     fs.ensureDirSync(cacheDir);
   }
@@ -113,15 +113,15 @@ export class TradeHistoryService {
     }
 
     try {
-      logInfo(`📡 Fetching trades from Binance API for ${symbol || 'all symbols'}...`);
+      logInfo(`📡 Fetching trades from exchange API for ${symbol || 'all symbols'}...`);
 
       // 从API获取数据
-      const trades = await this.binanceService.getAllUserTradesInRange(startTime, endTime, symbol);
+      const trades = await this.exchangeService.getAllUserTradesInRange(startTime, endTime, symbol);
 
       // 缓存数据
       this.saveCachedData(trades, symbol, startTime, endTime);
 
-      logInfo(`✅ Retrieved ${trades.length} trades from Binance API for ${symbol || 'all symbols'}`);
+      logInfo(`✅ Retrieved ${trades.length} trades from exchange API for ${symbol || 'all symbols'}`);
       return trades;
     } catch (error) {
       logWarn(`❌ Failed to fetch trades from API: ${error instanceof Error ? error.message : 'Unknown error'}`);

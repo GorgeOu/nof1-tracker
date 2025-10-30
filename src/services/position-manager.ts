@@ -1,5 +1,5 @@
 import { Position } from '../scripts/analyze-api';
-import { BinanceService } from './binance-service';
+import { ExchangeService } from './exchange-service';
 import { TradingExecutor } from './trading-executor';
 import { OrderHistoryManager } from './order-history-manager';
 import { TradingPlan } from '../types/trading';
@@ -43,7 +43,7 @@ export interface PositionValidationResult {
  */
 export class PositionManager {
   constructor(
-    private binanceService: BinanceService,
+    private exchangeService: ExchangeService,
     private tradingExecutor: TradingExecutor,
     private orderHistoryManager: OrderHistoryManager
   ) {}
@@ -58,11 +58,11 @@ export class PositionManager {
 
       // 1. 获取该币种的所有仓位和挂单
       const [positions, openOrders] = await Promise.all([
-        this.binanceService.getPositions(),
-        this.binanceService.getOpenOrders(symbol)
+        this.exchangeService.getPositions(),
+        this.exchangeService.getOpenOrders(symbol)
       ]);
 
-      const symbolPositions = positions.filter(p => p.symbol === this.binanceService.convertSymbol(symbol));
+      const symbolPositions = positions.filter(p => p.symbol === this.exchangeService.convertSymbol(symbol));
 
       logDebug(`${LOGGING_CONFIG.EMOJIS.DATA} Found ${symbolPositions.length} position(s) and ${openOrders.length} open order(s) for ${symbol}`);
 
@@ -315,7 +315,7 @@ export class PositionManager {
     console.log(`${LOGGING_CONFIG.EMOJIS.ERROR} Canceling ${orderCount} open orders for ${symbol}...`);
 
     try {
-      await this.binanceService.cancelAllOrders(symbol);
+      await this.exchangeService.cancelAllOrders(symbol);
       console.log(`${LOGGING_CONFIG.EMOJIS.SUCCESS} All open orders cancelled for ${symbol}`);
       return true;
     } catch (error) {
@@ -401,9 +401,9 @@ export class PositionManager {
     // 等待一段时间让交易确认
     await new Promise(resolve => setTimeout(resolve, TIME_CONFIG.VERIFICATION_DELAY));
 
-    const finalPositions = await this.binanceService.getPositions();
+    const finalPositions = await this.exchangeService.getPositions();
     const remainingPositions = finalPositions.filter(p =>
-      p.symbol === this.binanceService.convertSymbol(symbol) &&
+      p.symbol === this.exchangeService.convertSymbol(symbol) &&
       parseFloat(p.positionAmt) !== 0
     );
 
@@ -424,7 +424,7 @@ export class PositionManager {
       logDebug(`${LOGGING_CONFIG.EMOJIS.SEARCH} Checking for orphaned orders...`);
 
       // 1. 获取所有开放订单
-      const allOpenOrders = await this.binanceService.getOpenOrders();
+      const allOpenOrders = await this.exchangeService.getOpenOrders();
       
       if (allOpenOrders.length === 0) {
         logDebug(`${LOGGING_CONFIG.EMOJIS.SUCCESS} No open orders found`);
@@ -438,7 +438,7 @@ export class PositionManager {
       logDebug(`${LOGGING_CONFIG.EMOJIS.DATA} Found ${allOpenOrders.length} open order(s)`);
 
       // 2. 获取所有仓位(包括零仓位)
-      const allPositions = await this.binanceService.getAllPositions();
+      const allPositions = await this.exchangeService.getAllPositions();
       
       // 创建仓位映射 - symbol -> 是否有仓位
       const positionMap = new Map<string, boolean>();
@@ -485,7 +485,7 @@ export class PositionManager {
           
           // 从symbol中提取基础币种名称
           const baseSymbol = order.symbol.replace('USDT', '');
-          await this.binanceService.cancelOrder(baseSymbol, order.orderId);
+          await this.exchangeService.cancelOrder(baseSymbol, Number(order.orderId));
           
           cancelledCount++;
           logInfo(`${LOGGING_CONFIG.EMOJIS.SUCCESS} Cancelled order ${order.orderId} for ${order.symbol}`);

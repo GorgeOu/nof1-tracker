@@ -17,7 +17,7 @@ describe("TradingExecutor - Enhanced Coverage", () => {
 
   beforeEach(() => {
     executor = new TradingExecutor();
-    mockBinanceService = (executor as any).binanceService;
+    mockBinanceService = (executor as any).exchangeService;
 
     // Default mocks
     mockBinanceService.getServerTime = jest.fn().mockResolvedValue(Date.now());
